@@ -1,0 +1,161 @@
+POST REQUEST :
+URL : api/addPedido
+PARAMETER {key:value} 
+	idUsuario:{int}
+	pedido: {arrayKeyValue}
+	pago:{string} // valores possible string : effectivo ; visa ; mastercard
+	favorito:{bool} // parametro opcional (default false) valores possible bool  : true ; false 
+	factura:{obj} //  parametro opcional
+	pagoEffectivoCantidad:{float} // parametro opcional si pago por tarjeta
+	nota:{string} // parametro opcional
+	recibo:{string} // parametro opcional valores possible bool  : factura ; boleta
+
+    tipo_direccion:{string} // valores possible   : casa ; departamento ; trabajo ; otros
+	calle:{string}
+    referencias:{string}
+    nombre:{string} // parametro opcional si no seleccionado "otros"
+    distrito:{string}
+    numero:{string}
+    piso_apt:{string}
+    telefono:{string}
+	
+ejemplo POST data :  {idUsuario:1,pedido:{"45":5,"5":10,"15":1},favorito:true,pago_tipo:{nombre:"effectivo"},recibo:"factura",factura:{razon_social:"tactic",ruc:"045454456456"},pagoEffectivoCantidad:60,nota:"blab bla bla text",
+                     {direccion:{"tipo_direccion":"otros","calle":"carlos porras osores 245","referencias":"cuadra 11 javier prado","nombre":"amigo toto","distrito":"La Punta","numero":"245","piso_apt":"piso 4","telefono":"2391319"}}
+---
+POST REQUEST :
+URL : api/login
+PARAMETER {key:value} 
+	email:{string}
+	password:{string}
+	
+ejemplo POST data :  {email:"synry63@gmail.com",password:"acp2013$"}
+---
+POST REQUEST :
+URL : api/acceptarPedido
+PARAMETER {key:value}
+	id_distribuidor:{int}
+	id_pedido:{int}
+
+ejemplo POST data :  {id_distribuidor:10,id_pedido:78}
+---
+POST REQUEST :
+URL : api/loginDistribuidor
+PARAMETER {key:value} 
+	email:{string}
+	password:{string}
+	
+ejemplo POST data :  {email:"pmary@tacticperu.com",password:"acp2013$"}
+---	
+POST REQUEST :
+URL : api/register
+PARAMETER {key:value} 
+	nombre:{string}
+	apellidos:{string}
+	email:{string}	
+	password:{string}
+	confirm_password:{string}
+	direccion:{obj}
+	
+ejemplo POST data :  {nombre:"patrick",apellidos:"mary",email:"synry63@gmail.com",password:"acp2013$",confirm_password:"acp2013$",direccion:{calle:"carlos porras osores 245",referencias:"cuadra 11 javier prado",nombre:"mi casa",distrito:"La Punta",numero:"245",piso_apt:"piso 4",telefono:"2391319"}}
+					  
+---	
+POST REQUEST :
+URL : api/registerDistribuidor
+PARAMETER {key:value} 
+	nombre:{string}
+	descripcion:{string} // parametro opcional
+	email:{string}	
+	password:{string}
+	confirm_password:{string}
+	tiempoDelivery:{int} // en minutos
+	direccion:{obj}
+	
+ejemplo POST data :  {nombre:"tactic solutions",tiempoDelivery:30,email:"pmary@tacticperu.com",password:"acp2013$",confirm_password:"acp2013$",direccion:{calle:"carlos porras osores 245",referencias:"cuadra 11 javier prado",nombre:"mi casa",distrito:"La Punta",numero:"245",piso_apt:"piso 4",telefono:"2391319"}}
+				  
+---	
+POST REQUEST :
+URL : api/addDireccion
+POST-DATA : {idUser} 
+PARAMETER {key:value} 
+	idUsuario:{int}
+	calle:{string}
+	referencias:{string}
+	nombre:{string}
+	distrito:{string}
+	numero:{string}
+	piso_apt:{string}
+	telefono:{string}
+	
+ejemplo POST data :  {idUsuario:45,calle:"carlos porras osores 245",referencias:"cuadra 11 javier prado",nombre:"mi casa",distrito:"La Punta",numero:"245",piso_apt:"piso 4",telefono:"2391319"}	
+---
+POST REQUEST :
+URL : api/setFavorito
+PARAMETER {key:value} 
+	favorito:{bool}
+	idPedido:{int}
+	
+ejemplo POST data :  {favorito:true,idPedido:78};
+---	
+GET REQUEST :
+URL : api/getUser
+GET-DATA : {idUser} 
+ejemplo GET request :  api/getUser?id={idUser}
+---
+GET REQUEST :
+URL : api/getRecibo
+---
+GET REQUEST :
+URL : api/getCategorias
+---
+GET REQUEST :
+URL : api/getBebidasPorCategoria
+GET-DATA : {idCategoria} 
+ejemplo GET request :  api/getBebidasPorCategoria?id={idCategoria}
+---
+GET REQUEST :
+URL : api/searchBebida
+GET-DATA : {nombre}
+ejemplo GET request :  api/searchBebida?nombre=inca cola
+---
+GET REQUEST :
+URL : api/getPedidosFavoritos
+GET-DATA : {idUsuario} 
+ejemplo GET request :  api/getPedidosFavoritos?id={idUsuario}
+---
+GET REQUEST :
+URL : api/getBebida
+GET-DATA : {idBebida}
+ejemplo GET request :  api/getBebida?id={idBebida}
+---
+GET REQUEST :
+URL : api/getBebidas
+---
+GET REQUEST :
+URL : api/getPedido
+GET-DATA : {idPedido}
+ejemplo GET request :  api/getPedido?id={idPedido}
+---
+GET REQUEST :
+URL : api/getPedidosPorDistribuidor
+GET-DATA : {idDistribuidor}
+GET-DATA : {estado} // parametro opcional valores possible : pendiente; aceptado ; entregado
+ejemplo GET request :  api/getPedidosPorDistribuidor?id={idDistribuidor}
+---
+GET REQUEST :
+URL : api/getDistritos
+---
+GET REQUEST :
+URL : api/getMisDirecciones
+GET-DATA : {idUsuario} 
+ejemplo GET request :  api/getMisDirecciones?id={idUsuario}
+---
+GET REQUEST :
+URL : api/registerConfirmacion
+GET-DATA : {registerKey} 
+ejemplo GET request :  api/registerConfirmacion?registerKey={registerKey}
+---
+GET REQUEST :
+URL : api/registerDistribuidorConfirmacionEmail
+GET-DATA : {registerKey} 
+ejemplo GET request :  api/registerDistribuidorConfirmacionEmail?registerKey={registerKey}
+---
