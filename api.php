@@ -645,6 +645,69 @@
 
 
         }
+        private function editDireccion_v3(){
+            if($this->get_request_method() != "POST"){
+                $this->response('',406);
+            }
+
+            $idUsuario = $this->_request['id_user'];
+
+            $idDir = trim($this->_request['id']);
+            $calle = trim($this->_request['calle']);
+            $referencias = trim($this->_request['referencias']);
+            //$nombre = trim($this->_request['nombre']);
+            $custom_name = trim($this->_request['custom_name']);
+            $distrito = trim($this->_request['distrito']['name']);
+            if(!empty($idUsuario) and !empty($calle) and !empty($custom_name) and !empty($distrito)){
+                $userRepository = $this->em->getRepository('User');
+                $user = $userRepository->find($idUsuario);
+                $the_dir = null;
+                $new_slug = '';
+                // change value inside de array
+                for($i=0;$i<count($user->direcciones);$i++){
+
+                    if($user->direcciones[$i]->id==$idDir){
+
+                        // change this dir
+                        if($custom_name=="other" && !empty($custom_name)){
+                            $new_slug = $this->slugify($custom_name);
+                            $user->direcciones[$i]->slug = $new_slug;
+                            $user->direcciones[$i]->referencias = $referencias;
+                            $user->direcciones[$i]->nombre = $custom_name;
+                            $user->direcciones[$i]->custom_name = $custom_name;
+                            $user->direcciones[$i]->calle = $calle;
+                            $user->direcciones[$i]->distrito = $distrito;
+                            $user->direcciones[$i]->is_other_name = true;
+                        }
+                        else{
+                            $new_slug = $this->slugify($custom_name);
+                            $user->direcciones[$i]->slug = $new_slug;
+                            $user->direcciones[$i]->referencias = $referencias;
+                            $user->direcciones[$i]->nombre = $custom_name;
+                            $user->direcciones[$i]->custom_name = $custom_name;
+                            $user->direcciones[$i]->calle = $calle;
+                            $user->direcciones[$i]->distrito = $distrito;
+                            $user->direcciones[$i]->is_other_name = false;
+                        }
+                        break;
+                    }
+                }
+
+                for($j=0;$j<count($user->direcciones);$j++){
+                    $a_dir = $user->direcciones[$j];
+
+                    if($a_dir->slug==$new_slug && $j!=$i){
+                        $error = array('status' => "Failed", "msg" => "Este lugar ya lo registraste");
+                        $this->response($this->json($error), 400);
+                    }
+                }
+
+                $this->em->persist($user);
+                $this->em->flush();
+
+                $this->response($this->json($user->direcciones),200);
+            }
+        }
 		private function editDireccion_v2(){
 			if($this->get_request_method() != "POST"){
 				$this->response('',406);
@@ -775,6 +838,54 @@
 
 				$this->response($this->json($user->direcciones),200);
 			}
+        }
+        private function addDireccion_v3(){
+            if($this->get_request_method() != "POST"){
+                $this->response('',406);
+            }
+            $idUsuario = $this->_request['id_user'];
+            $calle = trim($this->_request['calle']);
+            $referencias = trim($this->_request['referencias']);
+            $custom_name = trim($this->_request['custom_name']);
+            $distrito = trim($this->_request['distrito']['name']);
+            if(!empty($idUsuario) and !empty($calle) and !empty($custom_name) and !empty($distrito)){
+                //if(!empty($idUsuario) and !empty($calle) and !empty($referencias) and !empty($nombre) and !empty($distrito) and !empty($numero) and !empty($piso_apt) and !empty($telefono)){
+                $userRepository = $this->em->getRepository('User');
+                $user = $userRepository->find($idUsuario);
+                if($user!=NULL){
+                    $name_slug = '';
+
+                    if($custom_name=="other"){
+
+                        //$name_slug = $this->slugify($custom_name);
+                        //$dir = $this->initDireccion($calle,$referencias,$nombre,$distrito,$name_slug,$custom_name,true);
+                    }
+                    else{
+                        $name_slug = $this->slugify($custom_name);
+                        $dir = $this->initDireccion($calle,$referencias,$custom_name,$distrito,$name_slug,$custom_name);
+                    }
+                    foreach ($user->direcciones as $a_dir){
+                        if($a_dir->slug==$name_slug){
+                            $error = array('status' => "Failed", "msg" => "Este lugar ya lo registraste");
+                            $this->response($this->json($error), 400);
+                        }
+                    }
+
+                    $dir->user = $user;
+
+                    $this->em->persist($dir);
+                    $this->em->flush();
+
+                    $user->direcciones[] = $dir;
+                    //unset($dir->user);
+                    $this->response($this->json($user->direcciones),200);
+                }
+
+
+            }
+            // If invalid inputs "Bad Request" status message and reason
+            $error = array('status' => "Failed", "msg" => "Invalid Data");
+            $this->response($this->json($error), 400);
         }
 		private function addDireccion_v2(){
 			if($this->get_request_method() != "POST"){
@@ -1316,6 +1427,339 @@
             if($user!=NULL){
                 $error = array('status' => "Failed", "msg" => "Este correo electrónico ya está registrado");
                 $this->response($this->json($error), 400);
+            }
+        }
+        private function addPedido_v6(){
+            if($this->get_request_method() != "POST"){
+                $this->response('',406);
+            }
+            date_default_timezone_set('America/Lima');
+            $number_of_the_week =(int) date('N');
+            if($number_of_the_week>1 && $number_of_the_week<=5){
+                $time_start = (int) date('G');
+                //$time_start = explode(':',$time_start);
+                if($time_start<18 && $time_start>=1){
+                    $error = array('status' => "time", "msg" => "Estamos cerrados. Abierto de martes a sabado a partir de las 6:pm");
+                    $this->response($this->json($error), 403);
+                }
+            }
+            else if($number_of_the_week==6){ // 6 saturday
+                $time_start = (int) date('G');
+                //$time_start = explode(':',$time_start);
+                if($time_start<18 && $time_start>=3){
+                    $error = array('status' => "time", "msg" => "Estamos cerrados. Abierto de martes a sabado a partir de las 6:pm");
+                    $this->response($this->json($error), 403);
+                }
+
+            }
+            else if($number_of_the_week==7){ // 7 sunday
+                $time_start = (int) date('G');
+                //$time_start = explode(':',$time_start);
+                if($time_start>=3){
+                    $error = array('status' => "time", "msg" => "Estamos cerrados. Abierto de martes a sabado a partir de las 6:pm");
+                    $this->response($this->json($error), 403);
+                }
+            }
+            else{ // 1 monday
+                $error = array('status' => "time", "msg" => "Estamos cerrados. Abierto de martes a sabado a partir de las 6:pm");
+                $this->response($this->json($error), 403);
+            }
+
+            $validation_test = array('new_user'=>false,'new_dir'=>false);
+
+            $dir = $this->_request['dir'];
+            $user = $this->_request['user'];
+            $pedido = $this->_request['order'];
+            $payment_type_id = $this->_request['payment_id'];
+
+
+
+            if(!empty($user) && !empty($dir) && !empty($pedido['pList']) && !empty($payment_type_id)){ // valid data
+                $userRepository = $this->em->getRepository('User');
+                $user_id = $user['id'];
+                if($user_id!=0){ // add pedido with existant user
+                    $user_temp = null;
+                    $user_temp = $user;
+                    // get the user
+                    $user = $userRepository->find($user['id']);
+
+                    // from where user come from and recomandation to user
+                    if(isset($this->_request['coming_from'])){
+                        $coming_from = $this->_request['coming_from'];
+                        $user->come_from = $coming_from['type'];
+                        if($coming_from['type']=="a-friend"){
+                            // he recomande this email
+                            $email_to_score_up = $coming_from['text'];
+                            if($email_to_score_up!=$user->email){
+                                $user_to_score_up = $userRepository->findOneBy(array('email' => $email_to_score_up));
+                                if($user_to_score_up!=NULL){
+                                    $user_to_score_up->puntos++;
+                                    $this->em->merge($user_to_score_up);
+                                }
+                            }
+
+                        }
+                    }
+                    // end from where user come from and recomandation to user
+
+                    $user->apellidos = $user_temp['apellidos'];
+                    $user->nombre = $user_temp['nombre'];
+                    if($user->email!=$user_temp['email']){
+                        $this->checkEmailExistAndNotNull($user_temp['email'],$userRepository);
+                        $user->email = $user_temp['email'];
+                    }
+
+
+                    $user->celular = $user_temp['celular'];
+
+                    $this->em->merge($user);
+
+                    unset($user_temp);
+
+                }
+                else{
+
+                    // create new user
+                    $new_user = new User();
+                    $new_user->apellidos = $user['apellidos'];
+                    $new_user->nombre = $user['nombre'];
+                    $new_user->active = 1;
+                    $date = new \DateTime("now");
+                    $new_user->fechaRegistro = $date->getTimestamp();
+                    $new_user->email = $user['email'];
+                    $new_user->password = $user['password'];
+                    $new_user->celular = $user['celular'];
+
+                    // from where user come from and recomandation to user
+                    if(isset($this->_request['coming_from'])){
+
+                        $coming_from = $this->_request['coming_from'];
+                        $new_user->come_from = $coming_from['type'];
+
+                        if($coming_from['type']=="a-friend"){
+                            // he recomande this email
+                            $email_to_score_up = $coming_from['text'];
+                            if($email_to_score_up!=$new_user->email){
+                                $user_to_score_up = $userRepository->findOneBy(array('email' => $email_to_score_up));
+                                if($user_to_score_up!=NULL){
+                                    $user_to_score_up->puntos++;
+                                    $this->em->merge($user_to_score_up);
+                                }
+                            }
+
+                        }
+                    }
+                    // end from where user come from and recomandation to user
+
+                    $this->checkEmailExistAndNotNull($new_user->email,$userRepository);
+
+
+                    $this->em->persist($new_user);
+                    $validation_test['new_user'] = true; // valid is new user
+                    $user = $new_user;
+                }
+
+                // get payment type
+                $pagoTipoRepository = $this->em->getRepository('PagoTipo');
+                $pagoTipo = $pagoTipoRepository->find($payment_type_id);
+                if($payment_type_id==3){
+                    $amount_obj = $this->_request['amount_obj'];
+                    $amount = $amount_obj['amount'];
+                }
+
+                // get all bebidas
+                $bebidaRepository = $this->em->getRepository('Bebida');
+                $bebidas = $bebidaRepository->findAll();
+
+                $idDir =  $dir['id'];  // check if new direccion or nor
+                if($idDir!=0){ // is not a new Direccion
+                    $dirRepository = $this->em->getRepository('Direccion');
+                    $new_calle = $dir['calle'];
+                    $new_distrito = $dir['distrito']['name'];
+                    $new_referencias = (isset($dir['referencias']) ? $dir['referencias'] : '');
+                    $dir = $dirRepository->find($idDir);
+
+                    $dir->referencias = $new_referencias;
+                    $dir->calle = $new_calle;
+                    $dir->distrito = $new_distrito;
+
+                    $this->em->merge($dir);
+
+                }
+                else{ // it is a new dir
+
+                    $name_slug = $this->slugify($dir['value']);
+                    $referencias = (isset($dir['referencias']) ? $dir['referencias'] : '');
+                    $dir = $this->initDireccion($dir['calle'],$referencias,$dir['value'],$dir['distrito']['name'],$name_slug,$dir['value'],true);
+                    $dir->user = $user;
+
+                    if(isset($user->direcciones)){
+                        foreach ($user->direcciones as $a_dir){ // if not new user check if address put allready exist
+                            if($a_dir->slug==$name_slug){
+                                $error = array('status' => "Failed", "msg" => "Este lugar ya lo registraste");
+                                $this->response($this->json($error), 400);
+                            }
+                        }
+                    }
+                    $this->em->persist($dir);
+                    $validation_test['new_dir'] = true; // valid is new user
+                }
+
+                $p = new Pedido();
+                $date = new \DateTime("now");
+                $p->fechaPendente = $date->getTimestamp();
+                $p->estado = "pendiente";
+                $p->user = $user;
+                $p->pagoTipo = $pagoTipo;
+                $p->direccion = $dir;
+                if(isset($amount)){
+                    $p->pagoEffectivoCantidad = $amount;
+                }
+                $this->em->persist($p);
+
+
+                // create order
+                $total_to_pay = 0;
+                $free_delivery = false;
+                for  ($i=0;$i<count($pedido['pList']);$i++){
+                    $an_item = $pedido['pList'][$i];
+                    $cpt = 0;
+                    $trouve = false;
+                    while ($cpt<count($bebidas) && $trouve==false){
+                        if($an_item['p']['id']==$bebidas[$cpt]->id){
+                            if(!$free_delivery && $bebidas[$cpt]->freeDelivery==true){
+                                $free_delivery = true;
+                            }
+                            $pb = new PedidoBebida();
+                            $pb->bebida = $bebidas[$cpt];
+                            $pb->cantidad = (int)$an_item['q'];
+                            $pb->pedido = $p;
+                            $this->em->persist($pb);
+                            $total_to_pay+= $pb->cantidad * floatval($pb->bebida->price);
+
+                            $trouve = true;
+                        }
+                        else{
+                            $cpt++;
+                        }
+                    }
+
+                }
+
+                if(!$free_delivery){
+                    $total_to_pay+= 3.5; // + delivery charge
+                }
+                // check if amount > total to pay
+
+                if(isset($amount)){
+                    $amount = floatval($amount);
+                    if($total_to_pay>$amount){
+                        $error = array('status' => "Failed", "msg" => "El monto de efectivo debe ser superior al monto a pagar");
+                        $this->response($this->json($error), 400);
+                    }
+                }
+                $this->em->flush();
+                if($validation_test['new_user'] && $validation_test['new_dir']){ // completly new
+                    $array_dir = array();
+                    $array_dir[] = $dir;
+                    $user->direcciones = $array_dir;
+                }
+                else if(!$validation_test['new_user'] && $validation_test['new_dir']){ // direccion is new only
+
+                    $user->direcciones[] = $dir;
+                }
+
+                //MOI TEST
+                $pedidoRepository = $this->em->getRepository('Pedido');
+                $lastOrder = $pedidoRepository->findOneBy(
+                    array('user' => $user),// Critere
+                    array('id' => 'desc'),// tri
+                    1
+                );
+                $pedidoBebidaRepository = $this->em->getRepository('PedidoBebida');
+
+                $pedido_items = $pedidoBebidaRepository->findBy(
+                    array('pedido' => $lastOrder),// Critere
+                    array('id' => 'asc')// tri
+                );
+
+
+                require_once 'libs/PHPMailer/PHPMailerAutoload.php';
+                // email to clients
+                $mail = new PHPMailer;
+
+//$mail->SMTPDebug = 3;                               // Enable verbose debug output
+
+                $mail->isSMTP();                                      // Set mailer to use SMTP
+                $mail->Host = 'gator4168.hostgator.com';  // Specify main and backup SMTP servers
+                $mail->SMTPAuth = true;                               // Enable SMTP authentication
+                $mail->Username = 'pedidos@drinkapp.pe';                 // SMTP username
+                $mail->Password = 'q*@aRBW#+*Hc';                           // SMTP password
+                $mail->SMTPSecure = 'ssl';                            // Enable TLS encryption, `ssl` also accepted
+                $mail->Port = 465;                                    // TCP port to connect to
+
+                $mail->setFrom('pedidos@drinkapp.pe', 'Pedidos DrinkApp');
+                $mail->addAddress($user->email, $user->nombre);     // Add a recipient
+
+                $mail->addReplyTo('pedidos@drinkapp.pe', 'Information');
+                //$mail->addCC('cc@example.com');
+                //$mail->addBCC('bcc@example.com');
+
+                //$mail->addAttachment('/var/tmp/file.tar.gz');         // Add attachments
+                //$mail->addAttachment('/tmp/image.jpg', 'new.jpg');    // Optional name
+                $mail->isHTML(false);                                  // Set email format to HTML
+
+                $mail->Subject = 'DrinkApp Pedido Numero DAPP'.$lastOrder->id;
+                $mail->Body    = 'Hola '.$user->nombre."\n";
+                $mail->Body    .= 'Su orden numero DAPP'.$lastOrder->id.' ha sido confirmada.'."\n\n";
+                $mail->Body    .= 'Resumen Pedido :'."\n";
+                foreach ($pedido_items as $item){
+                    $mail->Body    .=$item->cantidad.' X '.$item->bebida->nombre."\n";
+                }
+                $mail->Body    .="\n";
+                $mail->Body    .= "Total a pagar : S/. ".number_format(($total_to_pay),2, '.', '');
+
+                $mail->Body = utf8_decode($mail->Body);
+                //$mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
+
+                $mail->send();
+                //END MOI TEST
+                // email to admin
+                $mail2 = new PHPMailer;
+
+//$mail->SMTPDebug = 3;                               // Enable verbose debug output
+
+                $mail2->isSMTP();                                      // Set mailer to use SMTP
+                $mail2->Host = 'gator4168.hostgator.com';  // Specify main and backup SMTP servers
+                $mail2->SMTPAuth = true;                               // Enable SMTP authentication
+                $mail2->Username = 'pedidos@drinkapp.pe';                 // SMTP username
+                $mail2->Password = 'q*@aRBW#+*Hc';                           // SMTP password
+                $mail2->SMTPSecure = 'ssl';                            // Enable TLS encryption, `ssl` also accepted
+                $mail2->Port = 465;                                    // TCP port to connect to
+
+                $mail2->setFrom('pedidos@drinkapp.pe', 'Pedidos DrinkApp');
+                //$mail->addCC('cc@example.com');
+                //$mail->addBCC('bcc@example.com');
+                //$mail->addAttachment('/var/tmp/file.tar.gz');         // Add attachments
+                //$mail->addAttachment('/tmp/image.jpg', 'new.jpg');    // Optional name
+                $mail2->isHTML(false);                                  // Set email format to HTML
+
+                $mail2->Subject = 'DrinkApp Pedido Numero DAPP'.$lastOrder->id;
+
+                $mail2->Body    = 'Pedido de : '.$user->nombre.' '.$user->apellidos."\n";
+                $mail2->Body    .= 'Orden numero DAPP'.$lastOrder->id.' ha sido confirmada.'."\n\n";
+                $mail2->Body    .= 'Resumen Pedido :'."\n";
+                foreach ($pedido_items as $item){
+                    $mail2->Body    .=$item->cantidad.' X '.$item->bebida->nombre."\n";
+                }
+                $mail2->Body    .="\n";
+                $mail2->Body    .= "Total a pagar : S/. ".number_format(($total_to_pay),2, '.', '');
+
+                $mail2->addAddress('pedidos@drinkapp.pe');     // Add a recipient
+
+                $mail2->send();
+
+                $this->response($this->json($user),200);
             }
         }
         private function addPedido_v5(){
