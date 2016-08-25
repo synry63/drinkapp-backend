@@ -53,5 +53,11 @@ class Categoria
      */
     /** @Column(type="text",nullable=true) **/
     public $promocional_img_slider;
+
+    /**
+     * @var string
+     */
+    /** @Column(type="string") **/
+    public $keyIndex;
 	
 }
