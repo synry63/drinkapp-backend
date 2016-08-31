@@ -1435,19 +1435,52 @@
             }
             date_default_timezone_set('America/Lima');
             $number_of_the_week =(int) date('N');
-            if($number_of_the_week>1 && $number_of_the_week<=5){
+            /*if($number_of_the_week>1 && $number_of_the_week<=5){
                 $time_start = (int) date('G');
                 //$time_start = explode(':',$time_start);
                 if($time_start<18 && $time_start>=1){
                     $error = array('status' => "time", "msg" => "Estamos cerrados. Abierto de martes a sabado a partir de las 6:pm");
                     $this->response($this->json($error), 403);
                 }
-            }
+            }*/
+			if($number_of_the_week==1){ //  lundi
+				$error = array('status' => "time", "msg" => "Estamos cerrados. Abierto de martes a sabado");
+				$this->response($this->json($error), 403);
+			}
+			else if($number_of_the_week==2){ // mardi
+				$time_start = (int) date('G');
+				//$time_start = explode(':',$time_start);
+				if($time_start<19){
+					$error = array('status' => "time", "msg" => "Estamos cerrados. Abierto de martes a sabado");
+					$this->response($this->json($error), 403);
+				}
+			}
+			else if($number_of_the_week==3){ // mercredi
+				$time_start = (int) date('G');
+				if($time_start<19 && $time_start>=1){
+					$error = array('status' => "time", "msg" => "Estamos cerrados. Abierto de martes a sabado");
+					$this->response($this->json($error), 403);
+				}
+			}
+			else if($number_of_the_week==4){ // jeudi
+				$time_start = (int) date('G');
+				if($time_start<19 && $time_start>=1){
+					$error = array('status' => "time", "msg" => "Estamos cerrados. Abierto de martes a sabado");
+					$this->response($this->json($error), 403);
+				}
+			}
+			else if($number_of_the_week==5){ // vendredi
+				$time_start = (int) date('G');
+				if($time_start<20 && $time_start>=1){
+					$error = array('status' => "time", "msg" => "Estamos cerrados. Abierto de martes a sabado");
+					$this->response($this->json($error), 403);
+				}
+			}
             else if($number_of_the_week==6){ // 6 saturday
                 $time_start = (int) date('G');
                 //$time_start = explode(':',$time_start);
-                if($time_start<18 && $time_start>=3){
-                    $error = array('status' => "time", "msg" => "Estamos cerrados. Abierto de martes a sabado a partir de las 6:pm");
+                if($time_start<20 && $time_start>=4){
+                    $error = array('status' => "time", "msg" => "Estamos cerrados. Abierto de martes a sabado");
                     $this->response($this->json($error), 403);
                 }
 
@@ -1455,14 +1488,10 @@
             else if($number_of_the_week==7){ // 7 sunday
                 $time_start = (int) date('G');
                 //$time_start = explode(':',$time_start);
-                if($time_start>=3){
-                    $error = array('status' => "time", "msg" => "Estamos cerrados. Abierto de martes a sabado a partir de las 6:pm");
+                if($time_start>=4){
+                    $error = array('status' => "time", "msg" => "Estamos cerrados. Abierto de martes a sabado");
                     $this->response($this->json($error), 403);
                 }
-            }
-            else{ // 1 monday
-                $error = array('status' => "time", "msg" => "Estamos cerrados. Abierto de martes a sabado a partir de las 6:pm");
-                $this->response($this->json($error), 403);
             }
 
             $validation_test = array('new_user'=>false,'new_dir'=>false);
@@ -1763,40 +1792,69 @@
             }
         }
         private function addPedido_v5(){
-            if($this->get_request_method() != "POST"){
-                $this->response('',406);
-            }
-            date_default_timezone_set('America/Lima');
-            $number_of_the_week =(int) date('N');
-            if($number_of_the_week>1 && $number_of_the_week<=5){
+			if($this->get_request_method() != "POST"){
+				$this->response('',406);
+			}
+			date_default_timezone_set('America/Lima');
+			$number_of_the_week =(int) date('N');
+			/*if($number_of_the_week>1 && $number_of_the_week<=5){
                 $time_start = (int) date('G');
                 //$time_start = explode(':',$time_start);
                 if($time_start<18 && $time_start>=1){
                     $error = array('status' => "time", "msg" => "Estamos cerrados. Abierto de martes a sabado a partir de las 6:pm");
                     $this->response($this->json($error), 403);
                 }
-            }
-            else if($number_of_the_week==6){ // 6 saturday
-                $time_start = (int) date('G');
-                //$time_start = explode(':',$time_start);
-                if($time_start<18 && $time_start>=3){
-                    $error = array('status' => "time", "msg" => "Estamos cerrados. Abierto de martes a sabado a partir de las 6:pm");
-                    $this->response($this->json($error), 403);
-                }
+            }*/
+			if($number_of_the_week==1){ //  lundi
+				$error = array('status' => "time", "msg" => "Estamos cerrados. Abierto de martes a sabado");
+				$this->response($this->json($error), 403);
+			}
+			else if($number_of_the_week==2){ // mardi
+				$time_start = (int) date('G');
+				//$time_start = explode(':',$time_start);
+				if($time_start<19){
+					$error = array('status' => "time", "msg" => "Estamos cerrados. Abierto de martes a sabado");
+					$this->response($this->json($error), 403);
+				}
+			}
+			else if($number_of_the_week==3){ // mercredi
+				$time_start = (int) date('G');
+				if($time_start<19 && $time_start>=1){
+					$error = array('status' => "time", "msg" => "Estamos cerrados. Abierto de martes a sabado");
+					$this->response($this->json($error), 403);
+				}
+			}
+			else if($number_of_the_week==4){ // jeudi
+				$time_start = (int) date('G');
+				if($time_start<19 && $time_start>=1){
+					$error = array('status' => "time", "msg" => "Estamos cerrados. Abierto de martes a sabado");
+					$this->response($this->json($error), 403);
+				}
+			}
+			else if($number_of_the_week==5){ // vendredi
+				$time_start = (int) date('G');
+				if($time_start<20 && $time_start>=1){
+					$error = array('status' => "time", "msg" => "Estamos cerrados. Abierto de martes a sabado");
+					$this->response($this->json($error), 403);
+				}
+			}
+			else if($number_of_the_week==6){ // 6 saturday
+				$time_start = (int) date('G');
+				//$time_start = explode(':',$time_start);
+				if($time_start<20 && $time_start>=4){
+					$error = array('status' => "time", "msg" => "Estamos cerrados. Abierto de martes a sabado");
+					$this->response($this->json($error), 403);
+				}
 
-            }
-            else if($number_of_the_week==7){ // 7 sunday
-                $time_start = (int) date('G');
-                //$time_start = explode(':',$time_start);
-                if($time_start>=3){
-                    $error = array('status' => "time", "msg" => "Estamos cerrados. Abierto de martes a sabado a partir de las 6:pm");
-                    $this->response($this->json($error), 403);
-                }
-            }
-            else{ // 1 monday
-                $error = array('status' => "time", "msg" => "Estamos cerrados. Abierto de martes a sabado a partir de las 6:pm");
-                $this->response($this->json($error), 403);
-            }
+			}
+			else if($number_of_the_week==7){ // 7 sunday
+				$time_start = (int) date('G');
+				//$time_start = explode(':',$time_start);
+				if($time_start>=4){
+					$error = array('status' => "time", "msg" => "Estamos cerrados. Abierto de martes a sabado");
+					$this->response($this->json($error), 403);
+				}
+			}
 
             $validation_test = array('new_user'=>false,'new_dir'=>false);
 
