@@ -41,7 +41,7 @@ class Bebida
     /**
      * @var float
      */
-    /** @Column(type="decimal",precision=10,scale=2) **/
+    /** @Column(type="decimal",precision=10,scale=2,nullable=true) **/
     public $price;
 	/**
 	 * @var boolean
@@ -50,10 +50,21 @@ class Bebida
 	public $active;
 
     /**
+     * @var int
+     */
+    /** @Column(type="integer",nullable=true) **/
+    public $precioPuntos;
+    /**
      * @var boolean
      */
     /** @Column(type="boolean",options={"default": false}) **/
     public $freeDelivery;
+
+    /**
+     * @var boolean
+     */
+    /** @Column(type="boolean",options={"default": false}) **/
+    public $porPunto;
 	/**
      * @var Categoria
      */
