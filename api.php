@@ -1467,15 +1467,7 @@
 			}
 			date_default_timezone_set('America/Lima');
 			$number_of_the_week =(int) date('N');
-			/*if($number_of_the_week>1 && $number_of_the_week<=5){
-                $time_start = (int) date('G');
-                //$time_start = explode(':',$time_start);
-                if($time_start<18 && $time_start>=1){
-                    $error = array('status' => "time", "msg" => "Estamos cerrados. Abierto de martes a sabado a partir de las 6:pm");
-                    $this->response($this->json($error), 403);
-                }
-            }*/
-			if($number_of_the_week==1){ //  lundi
+			/*if($number_of_the_week==1){ //  lundi
 				$error = array('status' => "time", "msg" => "Estamos cerrados. Abierto de martes a sabado");
 				$this->response($this->json($error), 403);
 			}
@@ -1524,7 +1516,7 @@
 					$error = array('status' => "time", "msg" => "Estamos cerrados. Abierto de martes a sabado");
 					$this->response($this->json($error), 403);
 				}
-			}
+			}*/
 
 			$validation_test = array('new_user'=>false,'new_dir'=>false);
 
@@ -1561,7 +1553,7 @@
 
 					$user->celular = $user_temp['celular'];
 
-					$this->em->merge($user);
+					//$this->em->merge($user);
 
 					unset($user_temp);
 
@@ -1657,6 +1649,7 @@
 
 				// create order
 				$total_to_pay = 0;
+                $total_to_pay_puntos = 0;
 				$free_delivery = false;
 				for  ($i=0;$i<count($pedido['pList']);$i++){
 					$an_item = $pedido['pList'][$i];
@@ -1673,6 +1666,11 @@
 							$pb->pedido = $p;
 							$this->em->persist($pb);
 							$total_to_pay+= $pb->cantidad * floatval($pb->bebida->price);
+
+                            //total puntos
+                            if($pb->bebida->porPunto==true){
+                                $total_to_pay_puntos+= $pb->cantidad * $pb->bebida->precioPuntos;
+                            }
 
 							$trouve = true;
 						}
@@ -1695,6 +1693,17 @@
 						$this->response($this->json($error), 400);
 					}
 				}
+
+                // check if user have enought puntos
+                if(!$validation_test['new_user']){
+                    if($user->puntos<$total_to_pay_puntos){
+                        $error = array('status' => "Failed", "msg" => "No tienes suficientes puntos");
+                        $this->response($this->json($error), 400);
+                    }
+                    $user->puntos = $user->puntos-$total_to_pay_puntos;
+                    $this->em->merge($user);
+                }
+
 				$this->em->flush();
 				if($validation_test['new_user'] && $validation_test['new_dir']){ // completly new
 					$array_dir = array();
