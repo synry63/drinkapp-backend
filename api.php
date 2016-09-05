@@ -81,7 +81,51 @@
             $error = array('status' => "Failed", "msg" => utf8_encode("El usuario no existe"));
             $this->response($this->json($error), 400);
         }
+		private function setCupon(){
+			if($this->get_request_method() != "POST"){
+				$this->response('',406);
+			}
+			$id = trim($this->_request['id']);
+			$code = trim($this->_request['code']);
 
+			if($id==0){ // so new user
+				$cuponRepository = $this->em->getRepository('Cupon');
+				$cupon = $cuponRepository->findOneBy(
+						array('code'=>$code)
+				);
+				if($cupon!=null){
+					$this->response($this->json($cupon), 200);
+				}
+				else{
+					$error = array('status' => "Failed", "msg" => "El código ingresado es incorrecto.");
+					$this->response($this->json($error), 400);
+				}
+			}
+			else{ // user allready exist
+				$userRepository = $this->em->getRepository('User');
+				$user = $userRepository->find($id);
+
+				$cuponRepository = $this->em->getRepository('Cupon');
+				$cupon = $cuponRepository->findOneBy(
+						array('code'=>$code)
+				);
+				if($cupon!=null){
+					$pedidoRepository = $this->em->getRepository('Pedido');
+					$pedido = $pedidoRepository->findBy(
+							array('user'=>$user)
+					);
+					if($pedido!=null && count($pedido)>0){
+						$error = array('status' => "Failed", "msg" => "El código ingresado es para el primer pedido unicamente.");
+						$this->response($this->json($error), 400);
+					}
+				}
+				else{
+					$error = array('status' => "Failed", "msg" => "El código ingresado es incorrecto.");
+					$this->response($this->json($error), 400);
+				}
+
+			}
+		}
         /*
        *	Simple getDistritos API
        *  getDistritos must be GET method
