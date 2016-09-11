@@ -1873,21 +1873,21 @@
 			else if($number_of_the_week==2){ // mardi
 				$time_start = (int) date('G');
 				//$time_start = explode(':',$time_start);
-				if($time_start<19){
+				if($time_start<20){
 					$error = array('status' => "time", "msg" => "Estamos cerrados. Abierto de martes a sabado");
 					$this->response($this->json($error), 403);
 				}
 			}
 			else if($number_of_the_week==3){ // mercredi
 				$time_start = (int) date('G');
-				if($time_start<19 && $time_start>=1){
+				if($time_start<20 && $time_start>=1){
 					$error = array('status' => "time", "msg" => "Estamos cerrados. Abierto de martes a sabado");
 					$this->response($this->json($error), 403);
 				}
 			}
 			else if($number_of_the_week==4){ // jeudi
 				$time_start = (int) date('G');
-				if($time_start<19 && $time_start>=1){
+				if($time_start<20 && $time_start>=1){
 					$error = array('status' => "time", "msg" => "Estamos cerrados. Abierto de martes a sabado");
 					$this->response($this->json($error), 403);
 				}
@@ -2235,21 +2235,21 @@
 			else if($number_of_the_week==2){ // mardi
 				$time_start = (int) date('G');
 				//$time_start = explode(':',$time_start);
-				if($time_start<19){
+				if($time_start<20){
 					$error = array('status' => "time", "msg" => "Estamos cerrados. Abierto de martes a sabado");
 					$this->response($this->json($error), 403);
 				}
 			}
 			else if($number_of_the_week==3){ // mercredi
 				$time_start = (int) date('G');
-				if($time_start<19 && $time_start>=1){
+				if($time_start<20 && $time_start>=1){
 					$error = array('status' => "time", "msg" => "Estamos cerrados. Abierto de martes a sabado");
 					$this->response($this->json($error), 403);
 				}
 			}
 			else if($number_of_the_week==4){ // jeudi
 				$time_start = (int) date('G');
-				if($time_start<19 && $time_start>=1){
+				if($time_start<20 && $time_start>=1){
 					$error = array('status' => "time", "msg" => "Estamos cerrados. Abierto de martes a sabado");
 					$this->response($this->json($error), 403);
 				}
